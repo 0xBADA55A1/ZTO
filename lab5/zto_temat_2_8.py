@@ -12,8 +12,6 @@ import time
 Z = 1
 generator = RandomNumberGenerator(Z)
 
-n = 1000 # zadan
-m = 50 # maszyn
 
 class FlowShopSolution:
 	def generate_random_solution(self):
@@ -29,7 +27,7 @@ class FlowShopSolution:
 		self.execution_time = execution_time
 		self.generate_random_solution()
 	
-	def calc_time(self):
+	def objective(self):
 		duration = 0
 		for machine in range(self.m):
 			for task in range( len(self.solution[machine]) ):
@@ -81,8 +79,21 @@ class FlowShop:
 	def pick_best_random_solution(self, solutions_n):
 		for _ in range(solutions_n):
 			x_tmp = FlowShopSolution(self.n, self.m, self.execution_t)
-			if x_tmp.calc_time() < self.x.calc_time():
+			if x_tmp.objective() < self.x.objective():
 				self.x = x_tmp
+
+	def get_distraction(self, for_n_solutions):
+		f_min = self.n * self.m
+		f_max = 0
+
+		for _ in range(for_n_solutions):
+			x_tmp = FlowShopSolution(self.n, self.m, self.execution_t)
+			if x_tmp.objective() < f_min: f_min = x_tmp.objective()
+			if x_tmp.objective() > f_max: f_max = x_tmp.objective()
+
+		print(f_min, f_max)
+		return f_max - f_min
+
 	
 	def gen_rand_solution(self):
 		x_tmp = copy.deepcopy(self.x)
@@ -102,7 +113,7 @@ class FlowShop:
 		for _ in range(iterations_n):
 			x_tmp = self.gen_rand_solution()
 
-			if x_tmp.calc_time() < self.x.calc_time():
+			if x_tmp.objective() < self.x.objective():
 				self.x = x_tmp
 
 
@@ -113,26 +124,30 @@ class FlowShop:
 		)
 
 
-	def random_search_sa(self, iterations_n, t, t_a, t_min):
+	def random_search_sa(self, t, t_a, t_min, visual = False):
 		x_best = self.x
 
+		iterations = 0
 		while t >= t_min:
 			x_tmp = self.gen_rand_solution()
 			
-			if x_tmp.calc_time() < self.x.calc_time():
-					self.x = x_tmp
+			if x_tmp.objective() < self.x.objective():
+				self.x = x_tmp
 			else:
-				print("f(x') > f(x), p: " + str(self.calc_prob(self.x.calc_time(), x_tmp.calc_time(), t)))
-				if generator.nextFloat(0, 1) < self.calc_prob(self.x.calc_time(), x_tmp.calc_time(), t):
-					print("x' -> x")
+				if visual: print("f(x') > f(x), p: ", self.calc_prob(self.x.objective(), x_tmp.objective(), t) )
+				if generator.nextFloat(0, 1) < self.calc_prob(self.x.objective(), x_tmp.objective(), t):
+					if visual: print("x' -> x")
 					self.x = x_tmp
 
-			if self.x.calc_time() < x_best.calc_time():
+			if self.x.objective() < x_best.objective():
 				x_best = self.x
 				# print("f(x_best) > f(x)")
 
 			# print(t)
 			t *= t_a
+			iterations += 1
+
+		return iterations
 
 
 
@@ -140,16 +155,26 @@ class FlowShop:
 
 
 
+n = 1000 # zadan
+m = 50 # maszyn
 
 problem = FlowShop(n, m)
 problem.pick_best_random_solution(20)
 
-print(problem.x.calc_time())
 
 # problem.random_search(200)
+distraction = problem.get_distraction(for_n_solutions = 1000)
+print('distraction: ', distraction)
 
-problem.random_search_sa(20, 2000, 0.98, 1)
 
-print(problem.x.calc_time())
+print('f(x_0):', problem.x.objective() )
+i = problem.random_search_sa(
+	t=distraction,
+	t_a=0.99,
+	t_min=0.1,
+	visual=True
+)
+print('f(x):', problem.x.objective() )
+print("iterations done: ", i)
 
 # def basic():
