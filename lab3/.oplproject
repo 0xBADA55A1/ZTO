@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="ASCII"?><project>
+	<version>1.0</version>
+	<configs>
+		<config default="true" name="Konfiguracja1" category="opl">
+			<ref name="ZTO_lab3_QAP.mod" type="model">
+			</ref>
+		</config>
+	</configs>
+	
+</project>
