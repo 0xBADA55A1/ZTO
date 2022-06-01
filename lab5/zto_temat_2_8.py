@@ -146,7 +146,7 @@ class FlowShop:
 			# print(t)
 			t *= t_a
 			iterations += 1
-
+		self.x = x_best
 		return iterations
 
 
@@ -159,22 +159,29 @@ n = 1000 # zadan
 m = 50 # maszyn
 
 problem = FlowShop(n, m)
-problem.pick_best_random_solution(20)
+problem_c = copy.deepcopy(problem)
 
+problem.pick_best_random_solution(1000)
 
-# problem.random_search(200)
 distraction = problem.get_distraction(for_n_solutions = 1000)
-print('distraction: ', distraction)
+print('distraction:', distraction)
 
 
 print('f(x_0):', problem.x.objective() )
 i = problem.random_search_sa(
 	t=distraction,
-	t_a=0.99,
-	t_min=0.1,
-	visual=True
+	t_a=0.995,
+	t_min=1,
+	# visual=True
+	visual=False
 )
-print('f(x):', problem.x.objective() )
-print("iterations done: ", i)
+print('Random Search SA f(x):', problem.x.objective() )
+print("iterations done:", i)
+
+problem_c.random_search(i)
+print('Random Search (', i, 'iterations) f(x):', problem_c.x.objective() )
+
+
+n_list = []
 
 # def basic():
