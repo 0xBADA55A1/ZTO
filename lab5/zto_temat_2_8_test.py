@@ -7,8 +7,8 @@ import copy
 # Testing
 ##########################
 
-n = 1000 # zadan
-m = 50 # maszyn
+n = 50 # zadan
+m = 5 # maszyn
 
 problem = zto.FlowShop(n, m)
 problem_backup = copy.deepcopy(problem)
