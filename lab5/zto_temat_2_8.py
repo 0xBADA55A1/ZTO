@@ -5,9 +5,6 @@ from random import randrange
 import copy
 import math
 
-import matplotlib.pyplot as plt
-import time
-
 
 Z = 1
 generator = RandomNumberGenerator(Z)
@@ -91,7 +88,7 @@ class FlowShop:
 			if x_tmp.objective() < f_min: f_min = x_tmp.objective()
 			if x_tmp.objective() > f_max: f_max = x_tmp.objective()
 
-		print(f_min, f_max)
+		# print(f_min, f_max)
 		return f_max - f_min
 
 	
@@ -149,39 +146,3 @@ class FlowShop:
 		self.x = x_best
 		return iterations
 
-
-
-
-
-
-
-n = 1000 # zadan
-m = 50 # maszyn
-
-problem = FlowShop(n, m)
-problem_c = copy.deepcopy(problem)
-
-problem.pick_best_random_solution(1000)
-
-distraction = problem.get_distraction(for_n_solutions = 1000)
-print('distraction:', distraction)
-
-
-print('f(x_0):', problem.x.objective() )
-i = problem.random_search_sa(
-	t=distraction,
-	t_a=0.995,
-	t_min=1,
-	# visual=True
-	visual=False
-)
-print('Random Search SA f(x):', problem.x.objective() )
-print("iterations done:", i)
-
-problem_c.random_search(i)
-print('Random Search (', i, 'iterations) f(x):', problem_c.x.objective() )
-
-
-n_list = []
-
-# def basic():
