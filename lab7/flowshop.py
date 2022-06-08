@@ -114,7 +114,7 @@ class FlowShop:
 		return f_max - f_min
 
 	
-	def gen_rand_solution(self):
+	def gen_rand_solution_neighbour(self):
 		x_tmp = copy.deepcopy(self.x)
 
 		pos_a = generator.nextInt(0, self.n - 1)
@@ -130,12 +130,27 @@ class FlowShop:
 	def random_search(self, iterations_n):
 		# print('iteration: 0, f(x) =', self.x.objective())
 		for _ in range(iterations_n):
-			x_tmp = self.gen_rand_solution()
+			x_tmp = self.gen_rand_solution_neighbour()
 
 			if x_tmp.objective() < self.x.objective():
 				self.x = x_tmp
 				# print('iteration: ', _ +1 , ', f(x) =', self.x.objective())
 
+
+	def random_search(self, iterations_n):
+		def prob(it_):
+			return pow(0.995, it_)
+		# print('iteration: 0, f(x) =', self.x.objective())
+		P = [self.x]
+		for it in range(iterations_n):
+			x_tmp = self.gen_rand_solution_neighbour()
+
+			if x_tmp.objective() < self.x.objective():
+				self.x = x_tmp
+				P.append(self.x)
+			elif generator.nextFloat(0, 1) < prob(it):
+				self.x = x_tmp
+				P.append(self.x)
 
 	def calc_prob(self, f_x, f_x_tmp, t):
 		return pow(
@@ -149,7 +164,7 @@ class FlowShop:
 
 		iterations = 0
 		while t >= t_min:
-			x_tmp = self.gen_rand_solution()
+			x_tmp = self.gen_rand_solution_neighbour()
 			
 			if x_tmp.objective() < self.x.objective():
 				self.x = x_tmp
@@ -169,23 +184,3 @@ class FlowShop:
 		self.x = x_best
 		return iterations
 
-# import zto_temat_2_8 as zto
-import copy
-
-##########################
-# Testing
-##########################
-
-n = 50 # zadan
-m = 3 # maszyn
-
-problem = FlowShop(n, m)
-# problem_backup = copy.deepcopy(problem)
-# problem_c = copy.deepcopy(problem)
-
-# distraction = problem.get_distraction(for_n_solutions = 1000)
-# print('distraction:', distraction)
-i = 100
-print('f(x_0)=', problem.x.objective(), "T_max=", problem.x.tardiness())
-problem.random_search(i)
-print('Random Search (', i, 'iterations) f(x)=', problem.x.objective(), "T_max=", problem.x.tardiness() )
