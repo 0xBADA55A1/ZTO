@@ -90,7 +90,7 @@ class FlowShopSolution:
 		return sumC
 
 	# Kryterium 3 (T_max)
-	def tardiness(self):
+	def max_tardiness(self):
 		if self.C is None:
 			self.calc_C()
 		
@@ -100,14 +100,43 @@ class FlowShopSolution:
 			if t > t_max:
 				t_max = t
 		return t_max
+
+	# Kryterium 4 (ΣT)
+	def total_tardiness(self):
+		if self.C is None:
+			self.calc_C()
+
+		sumL = 0
+		for j in range(self.n):
+			t_tmp = self.C[j][self.m - 1] - self.d[j]
+			if t_tmp > 0:
+				sumL += t_tmp
+		return sumL
+
+	# Kryterium 5 (L_max)
+	def max_lateness(self):
+		if self.C is None:
+			self.calc_C()
+
+		L = [self.C[j][self.m - 1] - self.d[j] for j in range(self.n)]
+		return max(L)
+
+	# Kryterium 6 (ΣL)
+	def total_lateness(self):
+		if self.C is None:
+			self.calc_C()
+
+		sumL = 0
+		for j in range(self.n):
+			sumL += self.C[j][self.m - 1] - self.d[j]
+		return sumL
 	
 	# Criterion Selection
-
 	def criterion_A(self):
-		return self.total_flowtime()
+		return self.makespan()
 
 	def criterion_B(self):
-		return self.tardiness()
+		return self.max_tardiness()
 
 	# Misc
 	def __ne__(self, other):

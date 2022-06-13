@@ -12,7 +12,7 @@ m = 3 # maszyn
 
 problem = flowshop.FlowShop(n, m)
 
-i = 1000
+i = 100
 P = problem.sim_annealing(i)
 
 F = copy.copy(P)
