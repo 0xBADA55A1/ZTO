@@ -8,7 +8,7 @@ import math
 # Problem: Flowshop
 # Kryteria: 1,3,4,5
 # Wizualizacja: 1,4,5,7
-# Zadania na 5.0: 
+# Zadania na 5.0: - :(
 
 Z = 1
 generator = RandomNumberGenerator(Z)
@@ -21,6 +21,7 @@ class FlowShopSolution:
 			while n == pos_b:
 				pos_b = generator.nextInt(0, self.n - 1)
 			self.swap(n, pos_b)
+		self.C = None
 	
 	def __init__(self, tasks_n, machines_m, execution_time, d):
 		self.n = tasks_n
@@ -29,7 +30,13 @@ class FlowShopSolution:
 		self.d = d
 		self.queue = [n for n in range(self.n)]
 		self.generate_random_solution()
-	
+		self.C = None
+
+	def swap(self, pos_a, pos_b):
+		self.queue[pos_a], self.queue[pos_b] = self.queue[pos_b], self.queue[pos_a]
+		self.C = None
+		# print(self.queue)
+
 	def calc_C(self):
 		C = [[0 for x in range(self.m)] for y in range(self.n)]
 
@@ -55,21 +62,68 @@ class FlowShopSolution:
 
 
 	def objective(self):
-		self.calc_C()
+		if self.C is None:
+			self.calc_C()
 		# print(C[self.n - 1][self.m - 1])
 		return self.C[self.n - 1][self.m - 1]
 	
+	# Kryterium 1 (C_max) To nie to samo co objective???????
+	def makespan(self):
+		return self.objective()
+		# if self.C is None:
+		# 	self.calc_C()
+		# C_max = 0
+		# for j in range(self.n):
+		# 	C_t = self.C[j][self.m - 1]
+		# 	if C_t > C_max:
+		# 		C_max = C_t
+		# return C_max
+
+	# Kryterium 2 (ΣF)
+	def total_flowtime(self):
+		if self.C is None:
+			self.calc_C()
+
+		sumC = 0
+		for j in range(self.n):
+			sumC += self.C[j][self.m - 1]
+		return sumC
+
+	# Kryterium 3 (T_max)
 	def tardiness(self):
+		if self.C is None:
+			self.calc_C()
+		
 		t_max = 0
-		for j in range(1,self.n):
+		for j in range(self.n):
 			t = self.C[j][self.m - 1] - self.d[j]
 			if t > t_max:
 				t_max = t
 		return t_max
+	
+	# Criterion Selection
 
-	def swap(self, pos_a, pos_b):
-		self.queue[pos_a], self.queue[pos_b] = self.queue[pos_b], self.queue[pos_a]
-		# print(self.queue)
+	def criterion_A(self):
+		return self.total_flowtime()
+
+	def criterion_B(self):
+		return self.tardiness()
+
+	# Misc
+	def __ne__(self, other):
+		for i in range( len(self.queue) ):
+			if self.queue[i] != other.queue[i]:
+				return True
+		return False
+	
+	def __lt__(self, other):
+		if self.criterion_A() <= other.criterion_A():
+			if self.criterion_B() < other.criterion_B():
+				return True
+		elif self.criterion_B() <= other.criterion_B():
+			if self.criterion_A() < other.criterion_A():
+				return True
+		return False
 
 class FlowShop:
 	def generate_data(self, tasks_n, machines_m):
@@ -136,22 +190,6 @@ class FlowShop:
 				self.x = x_tmp
 				# print('iteration: ', _ +1 , ', f(x) =', self.x.objective())
 
-
-	def random_search(self, iterations_n):
-		def prob(it_):
-			return pow(0.995, it_)
-		# print('iteration: 0, f(x) =', self.x.objective())
-		P = [self.x]
-		for it in range(iterations_n):
-			x_tmp = self.gen_rand_solution_neighbour()
-
-			if x_tmp.objective() < self.x.objective():
-				self.x = x_tmp
-				P.append(self.x)
-			elif generator.nextFloat(0, 1) < prob(it):
-				self.x = x_tmp
-				P.append(self.x)
-
 	def calc_prob(self, f_x, f_x_tmp, t):
 		return pow(
 			math.e,
@@ -184,3 +222,23 @@ class FlowShop:
 		self.x = x_best
 		return iterations
 
+	# Zadanie 1
+
+	def sim_annealing(self, iterations_n):
+		def prob(it_):
+			# return pow(0.995, it_)
+			return 0.7
+		# print('iteration: 0, f(x) =', self.x.objective())
+		P = [self.x]
+		for it in range(iterations_n):
+			x_tmp = self.gen_rand_solution_neighbour()
+
+			# if x_tmp.objective() <= self.x.objective():
+			if x_tmp < self.x:
+				self.x = x_tmp
+				P.append(self.x)
+			elif generator.nextFloat(0, 1) < prob(it):
+				self.x = x_tmp
+				P.append(self.x)
+
+		return P
