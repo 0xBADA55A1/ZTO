@@ -8,12 +8,9 @@ import matplotlib.pyplot as plt
 ##########################
 
 
-def gen_pareto(i = 100):
-	n = 50 # zadan
-	m = 3 # maszyn
+def gen_pareto(problem, i = 100, seed = None):
 
-	problem = flowshop.FlowShop(n, m)
-	P = problem.sim_annealing(i)
+	P = problem.sim_annealing(i, seed)
 
 	F = copy.copy(P)
 	for a in P:
@@ -36,8 +33,8 @@ def gen_cryt_vectors(solutions):
 	return c_max, t_max
 
 def gen_Z(F):
-	z1_k = 1.005
-	z2_k = 1.05
+	z1_k = 1.3
+	z2_k = 1.3
 	z1 = F[0].criterion_A() * z1_k
 	z2 = F[-1].criterion_B() * z2_k
 
@@ -95,23 +92,33 @@ def plot_pareto(P, F, z1, z2, HVI, it):
 	
 
 # it = [80, 160, 320, 640, 1280]
-it = [80, 150, 300, 650, 1300]
+it = [80, 150, 300, 650, 1400]
 
-for i in it:
-	p, f = gen_pareto(i)
-	z1, z2 = gen_Z(f)
+n = 50 # zadan
+m = 3 # maszyn
+
+problem = flowshop.FlowShop(n, m)
+
+for idx, i in enumerate(it):
+	problem_temp = copy.deepcopy(problem)
+	p, f = gen_pareto(problem_temp, i, 1)
+	if idx == 0: 
+		z1, z2 = gen_Z(f)
 	hvi = calc_HVI(f, z1, z2)
 	plot_pareto(p, f, z1, z2, hvi, i)
-
+'''
 cycles = 10
 for i in it:
 	hvi_summ = 0
+	problem = flowshop.FlowShop(n, m)
 	for _ in range(cycles):
-		p, f = gen_pareto(i)
+		
+		problem_temp = copy.deepcopy(problem)
+		p, f = gen_pareto(problem_temp, i)
 		z1, z2 = gen_Z(f)
 		hvi_summ += calc_HVI(f, z1, z2)
 	print('it=', i, 'hvi=', hvi_summ / cycles)
-
+'''
 plt.show()
 
 
