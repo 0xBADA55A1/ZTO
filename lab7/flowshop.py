@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 from RandomNumberGenerator import RandomNumberGenerator
-from random import randrange
+# from random import randrange
 import copy
 import math
 
@@ -253,7 +253,9 @@ class FlowShop:
 
 	# Zadanie 1
 
-	def sim_annealing(self, iterations_n):
+	def sim_annealing(self, iterations_n, seed = None):
+		if seed is not None:
+			generator = RandomNumberGenerator(seed)
 		def prob(it_):
 			# return pow(0.995, it_)
 			return 0.7
